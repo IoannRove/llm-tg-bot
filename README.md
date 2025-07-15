@@ -1,4 +1,4 @@
-# Telegram Bot with Chat Context
+# Vibe coded Telegram Bot with Chat Context and LLM integration
 
 A Telegram bot that maintains chat context and responds when mentioned, built with Python 3.13, uv package manager, and Docker.
 
