@@ -68,6 +68,9 @@ class BotConfig:
     trigger_words: list[str] | None = None
     """Ключевые слова для активации бота"""
 
+    log_level: str = "INFO"
+    """Уровень логирования"""
+
 
 @dataclass
 class Settings:
@@ -110,6 +113,12 @@ def get_settings() -> Settings:
             return "deepseek-chat", "https://api.deepseek.com"
         elif provider == "openrouter":
             return "deepseek/deepseek-chat", "https://openrouter.ai/api/v1"
+        elif provider == "google" or provider == "gemini":
+            # Google AI Studio / Vertex AI (OpenAI-compatible)
+            return (
+                "gemini-1.5-flash",
+                "https://generativelanguage.googleapis.com/v1beta/openai/",
+            )
         else:  # openai
             return "gpt-4o-mini", None
 
@@ -167,5 +176,6 @@ def get_settings() -> Settings:
             base_prompt=base_prompt,
             context_window_size=int(os.getenv("CONTEXT_WINDOW_SIZE", "50")),
             trigger_words=trigger_words,
+            log_level=os.getenv("LOG_LEVEL", "INFO").upper(),
         ),
     )

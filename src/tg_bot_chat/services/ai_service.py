@@ -2,7 +2,6 @@
 Сервис для работы с OpenAI API
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass
 
@@ -118,37 +117,6 @@ class AIService:
 
         return messages
 
-    async def _call_api_with_retry(
-        self, client: AsyncOpenAI, model: str, messages: list[dict]
-    ):
-        """Вызов API с повторными попытками"""
-        max_retries = 3
-        last_exception = None
-        base_delay = 2
-
-        for attempt in range(max_retries):
-            try:
-                return await client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    max_tokens=1000,
-                    temperature=0.7,
-                )
-            except Exception as e:
-                last_exception = e
-                if attempt < max_retries - 1:
-                    # Экспоненциальная задержка: 2, 4, 8...
-                    delay = base_delay * (2**attempt)
-                    logger.warning(
-                        f"Request failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {delay}s..."
-                    )
-                    await asyncio.sleep(delay)
-
-        # Если все попытки исчерпаны
-        if last_exception:
-            raise last_exception
-        raise Exception("Unknown error during API call")
-
     async def generate_response(
         self,
         context: list[ChatMessage],
@@ -186,8 +154,11 @@ class AIService:
 
             # Вызов OpenAI API (v1.0+ синтаксис)
             try:
-                response = await self._call_api_with_retry(
-                    self.client, self.model, messages
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    max_tokens=1000,
+                    temperature=0.7,
                 )
                 model_used = self.model
             except Exception as e:
@@ -195,12 +166,15 @@ class AIService:
                     raise e
 
                 logger.warning(
-                    f"Primary AI provider failed after retries: {e}. Switching to fallback model: {self.fallback_model}"
+                    f"Primary AI provider failed: {e}. Switching to fallback model: {self.fallback_model}"
                 )
 
-                # Попытка использования fallback (тоже с повторными попытками)
-                response = await self._call_api_with_retry(
-                    self.fallback_client, self.fallback_model, messages
+                # Попытка использования fallback
+                response = await self.fallback_client.chat.completions.create(
+                    model=self.fallback_model,
+                    messages=messages,
+                    max_tokens=1000,
+                    temperature=0.7,
                 )
                 model_used = self.fallback_model
 

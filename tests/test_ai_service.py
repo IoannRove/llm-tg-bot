@@ -168,8 +168,8 @@ async def test_generate_response_fallback_success(mock_settings, mock_ai_client)
     # Assert
     assert response.content == "Fallback response"
     assert response.model_used == "fallback_model"
-    # Should be called multiple times due to retry (3 attempts)
-    assert mock_ai_client.chat.completions.create.call_count == 3
+    # Should be called once (no retry for primary)
+    assert mock_ai_client.chat.completions.create.call_count == 1
     mock_fallback_client.chat.completions.create.assert_called_once()
 
 
@@ -209,5 +209,5 @@ async def test_generate_response_fallback_fails_too(mock_settings, mock_ai_clien
     # The actual error from fallback is raised
     assert "Fallback failed" in response.content
 
-    assert mock_ai_client.chat.completions.create.call_count == 3
-    assert mock_fallback_client.chat.completions.create.call_count == 3
+    assert mock_ai_client.chat.completions.create.call_count == 1
+    assert mock_fallback_client.chat.completions.create.call_count == 1
