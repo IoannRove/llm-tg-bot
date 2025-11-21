@@ -5,7 +5,9 @@ A Telegram bot that maintains chat context and responds when mentioned, built wi
 ## Features
 
 - 🤖 **Context-aware responses**: Maintains chat history and context
+- 👤 **User-specific context tracking**: Tracks conversation history per user
 - 🎯 **Smart mention detection**: Responds when mentioned or triggered by keywords
+- 🔧 **Configurable trigger words**: Customize keywords that activate the bot via .env
 - 🎪 **Customizable base prompt**: Configure bot personality and behavior
 - 🔄 **Redis-based persistence**: Chat context stored in Redis
 - 🐳 **Docker-ready**: Full containerization with Docker Compose
@@ -56,6 +58,9 @@ AI_MODEL=gpt-4o-mini                 # OpenAI model
 # AI_MODEL=deepseek-chat             # DeepSeek direct
 # AI_MODEL=deepseek/deepseek-chat    # DeepSeek via OpenRouter
 # AI_MODEL=deepseek/deepseek-coder   # DeepSeek Coder via OpenRouter
+
+# Trigger Words (comma-separated list)
+TRIGGER_WORDS=бот,bot,помощь,help,вопрос,question,вика
 
 # Optional (with defaults)
 BOT_USERNAME=@your_bot_username
@@ -113,7 +118,8 @@ python main.py
 The bot responds to messages containing:
 
 - Direct mentions of the bot username (e.g., `@your_bot_username`)
-- Keywords: `бот`, `bot`, `помощь`, `help`, `вопрос`, `question`
+- Configurable trigger words (set in `.env` via `TRIGGER_WORDS`)
+- Default keywords: `бот`, `bot`, `помощь`, `help`, `вопрос`, `question`, `вика`
 
 ## Configuration
 
