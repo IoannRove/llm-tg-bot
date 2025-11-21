@@ -132,6 +132,9 @@ The bot responds to messages containing:
 | `AI_PROVIDER` | AI provider (openai, deepseek, openrouter) | `openai` |
 | `AI_MODEL` | AI model to use | `gpt-4o-mini` |
 | `AI_BASE_URL` | Custom API base URL | Provider default |
+| `FALLBACK_AI_PROVIDER` | Fallback AI provider | None |
+| `FALLBACK_AI_API_KEY` | API key for fallback provider | None |
+| `FALLBACK_AI_MODEL` | Fallback AI model | Provider default |
 | `REDIS_HOST` | Redis server host | `localhost` |
 | `REDIS_PORT` | Redis server port | `6379` |
 | `REDIS_PASSWORD` | Redis password | None |

@@ -1,6 +1,5 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
-from datetime import datetime
 from tg_bot_chat.handlers.message_handler import MessageHandler
 from tg_bot_chat.services.ai_service import AIResponse
 

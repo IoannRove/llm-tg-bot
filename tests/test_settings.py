@@ -1,5 +1,4 @@
 import os
-from unittest.mock import patch
 import pytest
 from tg_bot_chat.config.settings import get_settings, Settings
 
@@ -22,6 +21,37 @@ def test_get_settings_loads_from_env():
     assert "one" in settings.bot.trigger_words
     assert "two" in settings.bot.trigger_words
     assert "three" in settings.bot.trigger_words
+
+def test_get_settings_loads_fallback_from_env():
+    # Arrange
+    os.environ["TELEGRAM_BOT_TOKEN"] = "token"
+    os.environ["AI_API_KEY"] = "key"
+    os.environ["FALLBACK_AI_API_KEY"] = "fallback_key"
+    os.environ["FALLBACK_AI_MODEL"] = "fallback_model"
+    os.environ["FALLBACK_AI_PROVIDER"] = "deepseek"
+
+    # Act
+    settings = get_settings()
+
+    # Assert
+    assert settings.fallback_ai is not None
+    assert settings.fallback_ai.api_key == "fallback_key"
+    assert settings.fallback_ai.model == "fallback_model"
+    assert settings.fallback_ai.provider == "deepseek"
+    assert settings.fallback_ai.base_url == "https://api.deepseek.com" # default for deepseek
+
+def test_get_settings_no_fallback():
+    # Arrange
+    os.environ["TELEGRAM_BOT_TOKEN"] = "token"
+    os.environ["AI_API_KEY"] = "key"
+    if "FALLBACK_AI_API_KEY" in os.environ:
+        del os.environ["FALLBACK_AI_API_KEY"]
+
+    # Act
+    settings = get_settings()
+
+    # Assert
+    assert settings.fallback_ai is None
 
 def test_get_settings_missing_token_raises_error():
     # Arrange

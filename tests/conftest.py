@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, AsyncMock
-import os
 from tg_bot_chat.config.settings import Settings, TelegramConfig, AIConfig, RedisConfig, BotConfig
 
 @pytest.fixture

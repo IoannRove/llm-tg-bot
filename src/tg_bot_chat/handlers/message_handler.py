@@ -27,7 +27,7 @@ class MessageHandler:
         """
         self.settings = settings
         self.context_manager = ContextManager(settings.redis)
-        self.ai_service = AIService(settings.ai, settings.bot)
+        self.ai_service = AIService(settings.ai, settings.bot, settings.fallback_ai)
 
     async def handle_message(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE

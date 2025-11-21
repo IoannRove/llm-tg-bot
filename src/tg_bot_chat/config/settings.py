@@ -85,6 +85,9 @@ class Settings:
     bot: BotConfig
     """Настройки бота"""
 
+    fallback_ai: AIConfig | None = None
+    """Настройки резервного AI провайдера"""
+
 
 def get_settings() -> Settings:
     """Загрузка настроек из переменных окружения"""
@@ -102,15 +105,15 @@ def get_settings() -> Settings:
     ai_provider = os.getenv("AI_PROVIDER", "openai").lower()
 
     # Настройки для разных провайдеров
-    if ai_provider == "deepseek":
-        default_model = "deepseek-chat"
-        default_base_url = "https://api.deepseek.com"
-    elif ai_provider == "openrouter":
-        default_model = "deepseek/deepseek-chat"
-        default_base_url = "https://openrouter.ai/api/v1"
-    else:  # openai
-        default_model = "gpt-4o-mini"
-        default_base_url = None
+    def get_provider_config(provider: str) -> tuple[str, str | None]:
+        if provider == "deepseek":
+            return "deepseek-chat", "https://api.deepseek.com"
+        elif provider == "openrouter":
+            return "deepseek/deepseek-chat", "https://openrouter.ai/api/v1"
+        else:  # openai
+            return "gpt-4o-mini", None
+
+    default_model, default_base_url = get_provider_config(ai_provider)
 
     base_prompt = os.getenv(
         "BASE_PROMPT",
@@ -125,16 +128,35 @@ def get_settings() -> Settings:
         word.strip() for word in trigger_words_str.split(",") if word.strip()
     ]
 
+    # Настройка основного AI
+    ai_config = AIConfig(
+        api_key=ai_api_key,
+        model=os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL", default_model),
+        provider=ai_provider,
+        base_url=os.getenv("AI_BASE_URL", default_base_url),
+    )
+
+    # Настройка резервного AI (если есть ключ)
+    fallback_ai_config = None
+    fallback_api_key = os.getenv("FALLBACK_AI_API_KEY")
+
+    if fallback_api_key:
+        fallback_provider = os.getenv("FALLBACK_AI_PROVIDER", "openai").lower()
+        fb_default_model, fb_default_base_url = get_provider_config(fallback_provider)
+
+        fallback_ai_config = AIConfig(
+            api_key=fallback_api_key,
+            model=os.getenv("FALLBACK_AI_MODEL", fb_default_model),
+            provider=fallback_provider,
+            base_url=os.getenv("FALLBACK_AI_BASE_URL", fb_default_base_url),
+        )
+
     return Settings(
         telegram=TelegramConfig(
             bot_token=bot_token, bot_username=os.getenv("BOT_USERNAME")
         ),
-        ai=AIConfig(
-            api_key=ai_api_key,
-            model=os.getenv("AI_MODEL") or os.getenv("OPENAI_MODEL", default_model),
-            provider=ai_provider,
-            base_url=os.getenv("AI_BASE_URL", default_base_url),
-        ),
+        ai=ai_config,
+        fallback_ai=fallback_ai_config,
         redis=RedisConfig(
             host=os.getenv("REDIS_HOST", "localhost"),
             port=int(os.getenv("REDIS_PORT", "6379")),
